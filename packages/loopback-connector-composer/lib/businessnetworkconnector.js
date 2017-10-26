@@ -999,15 +999,12 @@ class BusinessNetworkConnector extends Connector {
         debug('getBlockchainInfo', options);
         return this.ensureConnected(options)
             .then((businessNetworkConnection) => {
-                return businessNetworkConnection.getHistorian();
+                return businessNetworkConnection.getBlockchainInfo();
             })
-            .then((historian) => {
-                return historian.getAll();
+            .then((blockchainInfo) => {
+                return blockchainInfo.getInfo();
             })
-            .then((records) => {
-                const result = records.map((transaction) => {
-                    return this.serializer.toJSON(transaction);
-                });
+            .then((result) => {
                 callback(null, result);
             })
             .catch((error) => {

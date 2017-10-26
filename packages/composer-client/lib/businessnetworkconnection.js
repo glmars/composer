@@ -23,6 +23,7 @@ const EventEmitter = require('events');
 const fs = require('fs');
 const FSConnectionProfileStore = require('composer-common').FSConnectionProfileStore;
 const Historian = require('./historian');
+const BlockchainInfo = require('./blockchaininfo');
 const IdentityRegistry = require('./identityregistry');
 const Logger = require('composer-common').Logger;
 const ParticipantRegistry = require('./participantregistry');
@@ -360,6 +361,23 @@ class BusinessNetworkConnection extends EventEmitter {
                     return historian;
                 } else {
                     throw new Error('Failed to find the historian');
+                }
+            });
+    }
+
+    /**
+     * Get the Blockchain info
+     * @return {Promise} - A promise that will be resolved to the {@link BlockchainInfo}
+     */
+    getBlockchainInfo() {
+        Util.securityCheck(this.securityContext);
+        return BlockchainInfo
+            .getBlockchainInfo(this.securityContext)
+            .then((info) => {
+                if (info) {
+                    return info;
+                } else {
+                    throw new Error('Failed to find the Blockchain info');
                 }
             });
     }

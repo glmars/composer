@@ -1087,6 +1087,32 @@ class HLFConnection extends Connection {
         return Promise.resolve({id:id,idStr:id.getTransactionID()});
     }
 
+    /**
+     * Queries for various useful information on the state of the Blockchain
+     * @return {Promise} A promise that is resolved with the data returned by the
+     * Channel.queryInfo once it has been invoked, or rejected with an error.
+     */
+    queryInfo() {
+        const method = 'queryInfo';
+        LOG.entry(method);
+
+        return this._initializeChannel()
+            .then(() => {
+                return this.channel.queryInfo();
+            })
+            .then((info) => {
+                LOG.debug(method, `Received info about blockchain, height is: ${info.height}`, info);
+                LOG.exit(info);
+                return info;
+            })
+            .catch((error) => {
+                const newError = new Error('Error trying to query Blockchain info. ' + error);
+                LOG.error(method, newError);
+                throw newError;
+            });
+
+    }
+
 }
 
 module.exports = HLFConnection;
