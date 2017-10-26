@@ -990,6 +990,63 @@ class BusinessNetworkConnector extends Connector {
     }
 
     /**
+     * Get information about the sate of the Blockchain
+     * @param {Object} options The LoopBack options.
+     * @param {function} callback The callback to call when complete.
+     * @returns {Promise} A promise that is resolved when complete.
+     */
+    getBlockchainInfo(options, callback) {
+        debug('getBlockchainInfo', options);
+        return this.ensureConnected(options)
+            .then((businessNetworkConnection) => {
+                return businessNetworkConnection.getHistorian();
+            })
+            .then((historian) => {
+                return historian.getAll();
+            })
+            .then((records) => {
+                const result = records.map((transaction) => {
+                    return this.serializer.toJSON(transaction);
+                });
+                callback(null, result);
+            })
+            .catch((error) => {
+                debug('getBlockchainInfo', 'error thrown doing getBlockchainInfo', error);
+                callback(error);
+            });
+    }
+
+    /**
+     * Get the Block with the specified ID from the Blockchain.
+     * @param {string} id The ID for the block.
+     * @param {Object} options The LoopBack options.
+     * @param {function} callback The callback to call when complete.
+     * @returns {Promise} A promise that is resolved when complete.
+     */
+    getBlockByID(id, options, callback) {
+        debug('getBlockByID', options);
+        return this.ensureConnected(options)
+            .then((businessNetworkConnection) => {
+                return businessNetworkConnection.getHistorian();
+            })
+            .then((historian) => {
+                return historian.get(id + '');
+            })
+            .then((transaction) => {
+                const result = this.serializer.toJSON(transaction);
+                callback(null, result);
+            })
+            .catch((error) => {
+                debug('getBlockByID', 'error thrown doing getBlockByID', error);
+                if (error.message.match(/does not exist/)) {
+                    error.statusCode = error.status = 404;
+                }
+                callback(error);
+            });
+
+    }
+
+    /**
      * Execute a named query and returns the results
      * @param {string} queryName The name of the query to execute
      * @param {object} queryParameters The query parameters

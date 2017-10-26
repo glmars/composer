@@ -161,7 +161,9 @@ function registerSystemMethods(app, dataSource) {
         registerBindIdentityMethod,
         registerRevokeIdentityMethod,
         registerGetAllHistorianRecordsMethod,
-        registerGetHistorianRecordsByIDMethod
+        registerGetHistorianRecordsByIDMethod,
+        registerGetBlockchainInfoMethod,
+        registerGetBlockByIDMethod
     ];
     registerMethods.forEach((registerMethod) => {
         registerMethod(app, dataSource, System, connector);
@@ -644,6 +646,81 @@ function registerGetHistorianRecordsByIDMethod(app, dataSource, System, connecto
             http: {
                 verb: 'get',
                 path: '/historian/:id'
+            }
+        }
+    );
+
+}
+
+/**
+ * Register the 'getBlockchainInfo' Composer system method.
+ * @param {Object} app The LoopBack application.
+ * @param {Object} dataSource The LoopBack data source.
+ * @param {Object} System The System model class.
+ * @param {Object} connector The LoopBack connector.
+ */
+function registerGetBlockchainInfoMethod(app, dataSource, System, connector) {
+
+    // Define and register the method.
+    System.getBlockchainInfo = (options, callback) => {
+        connector.getBlockchainInfo(options, callback);
+    };
+    System.remoteMethod(
+        'getBlockchainInfo', {
+            description: 'Get information about the sate of the Blockchain',
+            accepts: [{
+                arg: 'options',
+                type: 'object',
+                http: 'optionsFromRequest'
+            }],
+            returns: {
+                type: [ 'object' ],
+                root: true
+            },
+            http: {
+                verb: 'get',
+                path: '/blockchain'
+            }
+        }
+    );
+
+}
+
+/**
+ * Register the 'getBlockByID' Composer system method.
+ * @param {Object} app The LoopBack application.
+ * @param {Object} dataSource The LoopBack data source.
+ * @param {Object} System The System model class.
+ * @param {Object} connector The LoopBack connector.
+ */
+function registerGetBlockByIDMethod(app, dataSource, System, connector) {
+
+    // Define and register the method.
+    System.getBlockByID = (id, options, callback) => {
+        connector.getBlockByID(id, options, callback);
+    };
+    System.remoteMethod(
+        'getBlockByID', {
+            description: 'Get the specified Block from the Blockchain',
+            accepts: [{
+                arg: 'id',
+                type: 'integer',
+                required: true,
+                http: {
+                    source: 'path'
+                }
+            }, {
+                arg: 'options',
+                type: 'object',
+                http: 'optionsFromRequest'
+            }],
+            returns: {
+                type: 'object',
+                root: true
+            },
+            http: {
+                verb: 'get',
+                path: '/block/:id'
             }
         }
     );
