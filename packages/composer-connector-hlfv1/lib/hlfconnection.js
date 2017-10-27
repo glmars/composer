@@ -1136,27 +1136,7 @@ class HLFConnection extends Connection {
             })
             .then((block) => {
                 LOG.debug(method, `Received info about block ${block.header.number}`, block);
-
-                const transactions = [];
-                const block_data = block.data.data;
-                for (const i in block_data) {
-                    const payload = block_data[i].payload;
-
-                    const transactionType = payload.header.channel_header.type;
-                    const channelId = payload.header.channel_header.channel_id;
-                    const transactionId = payload.header.channel_header.tx_id;
-                    const transaction = {transactionType: transactionType, channelId: channelId, transactionId: transactionId};
-
-                    transactions.push(transaction);
-                }
-
-                const number = block.header.number.toString();
-                const result = {
-                    number: number,
-                    previousBlockHash: block.header.previous_hash,
-                    transactions: transactions
-                };
-
+                const result = this.decodeBlock(block);
                 LOG.exit(result);
                 return result;
             })
@@ -1165,9 +1145,49 @@ class HLFConnection extends Connection {
                 LOG.error(method, newError);
                 throw newError;
             });
-
     }
 
+    /**
+     * Decode the ledger Block
+     *
+     * @param {Object} block The ledger Block
+     * @return {Object} Object with usefull info
+     * @private
+     */
+    decodeBlock(block) {
+        const transactions = [];
+        const block_data = block.data.data;
+        for (const i in block_data) {
+            const payload = block_data[i].payload;
+            const transaction = this.decodeTransaction(payload);
+            transactions.push(transaction);
+        }
+
+        const number = block.header.number.toString();
+        const result = {
+            number: number,
+            previousBlockHash: block.header.previous_hash,
+            transactions: transactions
+        };
+
+        return result;
+    }
+
+    /**
+     * Decode the ledger transaction payload
+     *
+     * @param {Object} payload The ledger transaction payload
+     * @return {Object} Object with usefull info about transaction
+     * @private
+     */
+    decodeTransaction(payload) {
+        const transactionType = payload.header.channel_header.type;
+        const channelId = payload.header.channel_header.channel_id;
+        const transactionId = payload.header.channel_header.tx_id;
+        const result = {transactionType: transactionType, channelId: channelId, transactionId: transactionId};
+
+        return result;
+    }
 }
 
 module.exports = HLFConnection;
