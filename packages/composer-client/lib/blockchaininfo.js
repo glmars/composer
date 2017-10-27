@@ -55,6 +55,21 @@ class BlockchainInfo {
         Util.securityCheck(this.securityContext);
         return this.securityContext.getConnection().queryInfo();
     }
+
+    /**
+     * Queries the ledger on the target peer for Block by block number
+     *
+     * @param {number} blockNumber The number of the Block in question.
+     * @return {Promise} A promise that will be resolved with a JSON object
+     * representing the Block.
+     */
+    getBlock(blockNumber) {
+        Util.securityCheck(this.securityContext);
+        if (blockNumber === undefined) {
+            throw new Error('blockNumber not specified');
+        }
+        return this.securityContext.getConnection().queryBlock(blockNumber);
+    }
 }
 
 module.exports = BlockchainInfo;

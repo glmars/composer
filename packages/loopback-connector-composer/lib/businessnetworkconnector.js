@@ -1015,7 +1015,7 @@ class BusinessNetworkConnector extends Connector {
 
     /**
      * Get the Block with the specified ID from the Blockchain.
-     * @param {string} id The ID for the block.
+     * @param {number} id The ID for the block.
      * @param {Object} options The LoopBack options.
      * @param {function} callback The callback to call when complete.
      * @returns {Promise} A promise that is resolved when complete.
@@ -1024,13 +1024,12 @@ class BusinessNetworkConnector extends Connector {
         debug('getBlockByID', options);
         return this.ensureConnected(options)
             .then((businessNetworkConnection) => {
-                return businessNetworkConnection.getHistorian();
+                return businessNetworkConnection.getBlockchainInfo();
             })
-            .then((historian) => {
-                return historian.get(id + '');
+            .then((blockchainInfo) => {
+                return blockchainInfo.getBlock(id);
             })
-            .then((transaction) => {
-                const result = this.serializer.toJSON(transaction);
+            .then((result) => {
                 callback(null, result);
             })
             .catch((error) => {

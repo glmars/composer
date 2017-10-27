@@ -1113,6 +1113,34 @@ class HLFConnection extends Connection {
 
     }
 
+    /**
+     * Queries the ledger on the target peer for Block by block number
+     *
+     * @param {number} blockNumber The number of the Block in question.
+     * @return {Promise} A promise that is resolved with the data returned by the
+     * Channel.queryBlock once it has been invoked, or rejected with an error.
+     */
+    queryBlock(blockNumber) {
+        const method = 'queryBlock';
+        LOG.entry(method, blockNumber);
+
+        return this._initializeChannel()
+            .then(() => {
+                return this.channel.queryBlock(blockNumber);
+            })
+            .then((block) => {
+                LOG.debug(method, `Received info about block ${block.header.number}`, block);
+                LOG.exit(block);
+                return block;
+            })
+            .catch((error) => {
+                const newError = new Error('Error trying to query Block by block number. ' + error);
+                LOG.error(method, newError);
+                throw newError;
+            });
+
+    }
+
 }
 
 module.exports = HLFConnection;
