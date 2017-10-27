@@ -1184,7 +1184,56 @@ class HLFConnection extends Connection {
         const transactionType = payload.header.channel_header.type;
         const channelId = payload.header.channel_header.channel_id;
         const transactionId = payload.header.channel_header.tx_id;
-        const result = {transactionType: transactionType, channelId: channelId, transactionId: transactionId};
+        let writes = [];
+        if (transactionType === 'ENDORSER_TRANSACTION') {
+            writes = this.decodeWrites(payload.data.actions);
+        }
+        const result = {transactionType: transactionType, channelId: channelId, transactionId: transactionId, writes: writes};
+
+        return result;
+    }
+
+    /**
+     * Decode the transaction writes
+     *
+     * @param {Object} actions The transaction actions
+     * @return {Object} Object with usefull info about transaction writes
+     * @private
+     */
+    decodeWrites(actions) {
+        const result = [];
+
+        if (actions.length === 0) {
+            return result;
+        }
+
+        // TODO Is it correct to decode only first action?
+        const namespaceReadWriteSet = actions[0].payload.action.proposal_response_payload.extension.results.ns_rwset;
+
+        for (const i in namespaceReadWriteSet) {
+            const set = namespaceReadWriteSet[i];
+            const writes = {namespace: set.namespace, writes: this.decodeReadWriteSet(set.rwset)};
+            result.push(writes);
+        }
+
+        return result;
+    }
+
+    /**
+     * Decode the read-write set to writes
+     *
+     * @param {Object} readWriteSet The read-write set
+     * @return {Object} Object with usefull info about transaction writes
+     * @private
+     */
+    decodeReadWriteSet(readWriteSet) {
+        const result = [];
+
+        for (const i in readWriteSet.writes) {
+            const write = readWriteSet.writes[i];
+            const writeInfo = {key: write.key, delete: write.is_delete};
+            result.push(writeInfo);
+        }
 
         return result;
     }
