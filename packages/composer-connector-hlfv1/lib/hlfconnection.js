@@ -1136,8 +1136,29 @@ class HLFConnection extends Connection {
             })
             .then((block) => {
                 LOG.debug(method, `Received info about block ${block.header.number}`, block);
-                LOG.exit(block);
-                return block;
+
+                const transactions = [];
+                const block_data = block.data.data;
+                for (const i in block_data) {
+                    const payload = block_data[i].payload;
+
+                    const transactionType = payload.header.channel_header.type;
+                    const channelId = payload.header.channel_header.channel_id;
+                    const transactionId = payload.header.channel_header.tx_id;
+                    const transaction = {transactionType: transactionType, channelId: channelId, transactionId: transactionId};
+
+                    transactions.push(transaction);
+                }
+
+                const number = block.header.number.toString();
+                const result = {
+                    number: number,
+                    previousBlockHash: block.header.previous_hash,
+                    transactions: transactions
+                };
+
+                LOG.exit(result);
+                return result;
             })
             .catch((error) => {
                 const newError = new Error('Error trying to query Block by block number. ' + error);
