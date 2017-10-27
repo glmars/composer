@@ -1102,8 +1102,14 @@ class HLFConnection extends Connection {
             })
             .then((info) => {
                 LOG.debug(method, `Received info about blockchain, height is: ${info.height}`, info);
-                LOG.exit(info);
-                return info;
+
+                const height = info.getHeight().toString();
+                const currentBlockHash = info.getCurrentBlockHash().toHex();
+                const previousBlockHash = info.getPreviousBlockHash().toHex();
+                const result = {height: height, currentBlockHash: currentBlockHash, previousBlockHash: previousBlockHash};
+
+                LOG.exit(result);
+                return result;
             })
             .catch((error) => {
                 const newError = new Error('Error trying to query Blockchain info. ' + error);

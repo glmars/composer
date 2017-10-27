@@ -661,6 +661,32 @@ function registerGetHistorianRecordsByIDMethod(app, dataSource, System, connecto
  */
 function registerGetBlockchainInfoMethod(app, dataSource, System, connector) {
 
+    // Create and register the models.
+    const BlockchainInfoResponse = app.loopback.createModel({
+        name: 'BlockchainInfoResponse',
+        description: 'Various useful information on the state of the Blockchain',
+        base: 'Model',
+        properties: {
+            height: {
+                type: 'string',
+                required: true
+            },
+            currentBlockHash: {
+                type: 'string',
+                required: true
+            },
+            previousBlockHash: {
+                type: 'string',
+                required: true
+            }
+        },
+        hidden: [ 'id' ]
+    });
+    app.model(BlockchainInfoResponse, {
+        dataSource: dataSource,
+        public: false
+    });
+
     // Define and register the method.
     System.getBlockchainInfo = (options, callback) => {
         connector.getBlockchainInfo(options, callback);
@@ -674,7 +700,7 @@ function registerGetBlockchainInfoMethod(app, dataSource, System, connector) {
                 http: 'optionsFromRequest'
             }],
             returns: {
-                type: [ 'object' ],
+                type: 'BlockchainInfoResponse',
                 root: true
             },
             http: {
