@@ -1184,23 +1184,23 @@ class HLFConnection extends Connection {
         const transactionType = payload.header.channel_header.type;
         const channelId = payload.header.channel_header.channel_id;
         const transactionId = payload.header.channel_header.tx_id;
-        let writes = [];
+        let historian = [];
         if (transactionType === 'ENDORSER_TRANSACTION') {
-            writes = this.decodeWrites(payload.data.actions);
+            historian = this.decodeHistorian(payload.data.actions);
         }
-        const result = {transactionType: transactionType, channelId: channelId, transactionId: transactionId, writes: writes};
+        const result = {transactionType: transactionType, channelId: channelId, transactionId: transactionId, historian: historian};
 
         return result;
     }
 
     /**
-     * Decode the transaction writes
+     * Decode the transaction historian records
      *
      * @param {Object} actions The transaction actions
-     * @return {Object} Object with usefull info about transaction writes
+     * @return {Object} Object with usefull info about historian records
      * @private
      */
-    decodeWrites(actions) {
+    decodeHistorian(actions) {
         const result = [];
 
         if (actions.length === 0) {
@@ -1212,27 +1212,33 @@ class HLFConnection extends Connection {
 
         for (const i in namespaceReadWriteSet) {
             const set = namespaceReadWriteSet[i];
-            const writes = {namespace: set.namespace, writes: this.decodeReadWriteSet(set.rwset)};
-            result.push(writes);
+            const historian = {namespace: set.namespace, historian: this.decodeHistorianFromReadWriteSet(set.rwset)};
+            result.push(historian);
         }
 
         return result;
     }
 
     /**
-     * Decode the read-write set to writes
+     * Decode the read-write set to historian records
      *
      * @param {Object} readWriteSet The read-write set
-     * @return {Object} Object with usefull info about transaction writes
+     * @return {Object} Object with usefull info about transaction historian records
      * @private
      */
-    decodeReadWriteSet(readWriteSet) {
+    decodeHistorianFromReadWriteSet(readWriteSet) {
         const result = [];
 
         for (const i in readWriteSet.writes) {
             const write = readWriteSet.writes[i];
-            const writeInfo = {key: write.key, delete: write.is_delete};
-            result.push(writeInfo);
+            if (write.key.length > 0) {
+                const segments = write.key.split('\u0000');
+                if (segments.length >= 3 &&
+                    segments[1] === 'Asset:org.hyperledger.composer.system.HistorianRecord') {
+                    const historianId = segments[2];
+                    result.push(historianId);
+                }
+            }
         }
 
         return result;
