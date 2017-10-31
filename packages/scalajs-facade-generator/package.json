@@ -1,0 +1,80 @@
+{
+  "name": "scalajs-facade-generator",
+  "version": "0.14.1",
+  "description": "A Scala.js facade generator for Hyperledger Composer",
+  "engines": {
+    "node": ">=6",
+    "npm": ">=3"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "pretest": "npm run lint",
+    "lint": "eslint .",
+    "postlint": "npm run licchk",
+    "licchk": "license-check",
+    "test": "nyc mocha --recursive -t 10000",
+    "mocha": "mocha --recursive -t 10000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperledger/composer.git"
+  },
+  "keywords": [
+    "blockchain",
+    "hyperledger",
+    "solutions"
+  ],
+  "author": "Hyperledger Composer",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "composer-client": "0.14.1",
+    "composer-common": "0.14.1",
+    "node-cache": "4.1.1"
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "chai-as-promised": "6.0.0",
+    "composer-admin": "0.14.1",
+    "composer-connector-embedded": "0.14.1",
+    "eslint": "3.17.1",
+    "jsdoc": "3.4.3",
+    "license-check": "1.1.5",
+    "mocha": "3.4.2",
+    "nyc": "11.1.0",
+    "sinon": "2.3.8",
+    "sleep-promise": "2.0.0"
+  },
+  "license-check-config": {
+    "src": [
+      "**/*.js",
+      "!./coverage/**/*",
+      "!./node_modules/**/*",
+      "!./out/**/*"
+    ],
+    "path": "header.txt",
+    "blocking": true,
+    "logInfo": false,
+    "logError": true
+  },
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "integration-test/**",
+      "out/**",
+      "scripts/**",
+      "systest/**",
+      "test/**"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
+  }
+}
